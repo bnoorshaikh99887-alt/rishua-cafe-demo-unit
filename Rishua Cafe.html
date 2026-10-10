@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rishua Cafe - demo unit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: #fcf8f2; color: #1f2937; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
+        .brand-font { font-family: 'Pacifico', cursive; }
+
+        /* Navbar */
+        nav {
+            background: rgba(120, 53, 15, 0.95); backdrop-filter: blur(10px); color: white;
+            padding: 15px 30px; position: sticky; top: 0; z-index: 50;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        nav h1 { font-size: 28px; color: #fde68a; cursor: pointer; }
+        
+        .cart-btn {
+            background: linear-gradient(145deg, #d97706, #b45309); color: white; border: none;
+            padding: 12px 25px; border-radius: 30px; font-size: 16px; font-weight: 600;
+            cursor: pointer; position: relative; transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(217, 119, 6, 0.4); z-index: 55;
+        }
+        
+        .cart-badge {
+            background-color: #ef4444; color: white; font-size: 13px; padding: 3px 9px;
+            border-radius: 50%; position: absolute; top: -8px; right: -8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        .pop-anim { animation: popBubble 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popBubble { 0% { transform: scale(1); } 50% { transform: scale(1.6); } 100% { transform: scale(1); } }
+
+        .shake-anim { animation: shakeCart 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+        @keyframes shakeCart {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px) rotate(-8deg); }
+            40% { transform: translateX(6px) rotate(8deg); }
+            60% { transform: translateX(-4px) rotate(-4deg); }
+            80% { transform: translateX(4px) rotate(4deg); }
+        }
+
+        /* Hero */
+        .hero {
+            height: 300px; background-image: url('https://wsrv.nl/?url=images.pexels.com/photos/376464/pexels-photo-376464.jpeg&w=1200&q=60');
+            background-size: cover; background-position: center; position: relative;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+        }
+        .hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+        .hero-content { position: relative; z-index: 10; color: white; }
+        .hero-content h2 { font-size: 42px; color: #fcd34d; margin-bottom: 5px; }
+
+        /* Menu Grid */
+        .menu-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; flex: 1; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+
+        /* Card Setup with Image Slider (Exactly 2 Images) */
+        .card {
+            background: white; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column;
+            transition: transform 0.3s; cursor: pointer; border: 1px solid #fef3c7;
+        }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(120,53,15,0.15); }
+        
+        .img-container { width: 100%; height: 220px; overflow: hidden; position: relative; background-color: #fef3c7; }
+        .carousel-track { display: flex; width: 200%; height: 100%; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .carousel-track img { width: 50%; height: 100%; object-fit: cover; flex-shrink: 0; }
+        
+        .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .card-title { font-size: 20px; font-weight: 700; color: #78350f; }
+        .card-desc { font-size: 14px; color: #6b7280; margin: 5px 0 15px 0; flex: 1; line-height: 1.5; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .card-price { font-size: 22px; font-weight: 800; color: #1f2937; }
+        
+        .add-btn {
+            background: linear-gradient(145deg, #fef3c7, #fde68a); color: #92400e;
+            border: none; padding: 10px 18px; border-radius: 12px; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; z-index: 5;
+        }
+        .add-btn:hover { background: #d97706; color: white; }
+        .add-btn:active { transform: scale(0.9); }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed; top: 0; right: -400px; width: 350px; height: 100%;
+            background: white; box-shadow: -10px 0 40px rgba(0,0,0,0.3);
+            transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1); z-index: 100;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { background: #78350f; color: white; padding: 20px; display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; }
+        .close-cart { background: none; border: none; color: white; font-size: 30px; cursor: pointer; }
+        .cart-items-container { flex: 1; overflow-y: auto; padding: 20px; background: #f9fafb; position: relative; }
+        .cart-item {
+            background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee;
+        }
+        .qty-controls { display: flex; gap: 8px; background: #fef3c7; padding: 5px; border-radius: 8px; }
+        .qty-btn { background: white; border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; color: #92400e; }
+        .cart-footer { padding: 20px; background: white; border-top: 1px solid #e5e7eb; }
+        .place-order-btn { width: 100%; background: #d97706; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
+
+        /* Overlays & Modals */
+        .overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px); z-index: 90; opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .overlay.show { opacity: 1; visibility: visible; }
+
+        .detail-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            background: white; width: 90%; max-width: 450px; border-radius: 20px; overflow: hidden;
+            z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+        .detail-modal.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+        .detail-img { width: 100%; height: 250px; object-fit: cover; }
+        .detail-body { padding: 25px; }
+        .detail-title { font-size: 26px; color: #78350f; font-weight: 700; margin-bottom: 10px; }
+        .detail-feature { background: #fef3c7; color: #92400e; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 15px; border-left: 4px solid #d97706; }
+        .detail-desc { font-size: 15px; color: #4b5563; line-height: 1.6; margin-bottom: 20px; }
+        .close-detail { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+
+        footer { text-align: center; padding: 25px; color: #9ca3af; font-size: 14px; font-weight: 600; background-color: #f3f4f6; margin-top: 40px; }
+        footer span { color: #d97706; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1 class="brand-font">Rishua Cafe</h1>
+        <button class="cart-btn" id="nav-cart-btn" onclick="toggleCart()">
+            🛒 Cart <span class="cart-badge" id="cart-count" style="display:none;">0</span>
+        </button>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h2 class="brand-font">Welcome to Rishua</h2>
+            <p>Experience the finest blend of taste and elegance.</p>
+        </div>
+    </div>
+
+    <div class="menu-container">
+        <div class="menu-grid" id="menu-grid"></div>
+    </div>
+
+    <footer>
+        Designed & Created by <span>Anonymous</span>
+    </footer>
+
+    <div class="overlay" id="main-overlay" onclick="closeAll()"></div>
+    
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header"><span>🛍️ Your Cart</span><button class="close-cart" onclick="toggleCart()">&times;</button></div>
+        <div class="cart-items-container" id="cart-items">
+            <p style="text-align:center; margin-top:20px; color:#888;">Your cart is currently empty.</p>
+        </div>
+        <div class="cart-footer">
+            <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:bold; margin-bottom:15px;">
+                <span>Total Amount:</span><span id="cart-total">₹0</span>
+            </div>
+            <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
+        </div>
+    </div>
+
+    <div class="detail-modal" id="detail-modal">
+        <button class="close-detail" onclick="closeAll()">&times;</button>
+        <img src="" class="detail-img" id="dm-img">
+        <div class="detail-body">
+            <h2 class="detail-title" id="dm-title">Title</h2>
+            <div class="detail-feature" id="dm-feature">✨ Premium Highlights</div>
+            <p class="detail-desc" id="dm-desc">Desc</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size: 24px; font-weight: bold;" id="dm-price">₹0</span>
+                <button class="add-btn" id="dm-add-btn" style="padding: 12px 25px; font-size:16px;">Add to Cart +</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bulletproof Fallback image logic: Generates a beautiful warm-colored "Delicious Food" box if network fails
+        const fallbackSVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="350" fill="%23fef3c7"><rect width="100%25" height="100%25" fill="%23fef3c7"/><text x="50%25" y="50%25" font-family="sans-serif" font-size="24" fill="%2378350f" text-anchor="middle" dominant-baseline="middle">Delicious Food</text></svg>`;
+        
+        function imgError(image) {
+            image.onerror = "";
+            image.src = fallbackSVG; // Replaces broken image with safe text box
+            return true;
+        }
+
+        // 100% Verified Pexels IDs, passing through extremely reliable WSRV cache. Exactly 2 per item.
+        const menuItems = [
+            { id: 1, name: "Espresso Delight", price: 120, desc: "Strong and bold classic espresso shot.", feature: "A perfect 100% Arabica bean shot to keep you energized!", 
+              images: ["312418", "302899"] },
+            
+            { id: 2, name: "Cappuccino Classic", price: 150, desc: "Rich espresso topped with steamed milk foam.", feature: "A perfect balance of rich espresso and thick creamy foam.", 
+              images: ["414645", "350478"] },
+            
+            { id: 3, name: "Mocha Frappuccino", price: 220, desc: "Chilled blended iced coffee with chocolate.", feature: "A cold, sweet, and thick blend of premium dark chocolate and coffee.", 
+              images: ["1191503", "1209028"] },
+            
+            { id: 4, name: "Strawberry Smoothie", price: 170, desc: "Fresh sweet strawberries blended with yogurt.", feature: "Real fresh strawberries blended with low-fat yogurt and a touch of honey.", 
+              images: ["856004", "1346345"] },
+            
+            { id: 5, name: "Classic Veg Burger", price: 120, desc: "Crispy vegetable patty with fresh lettuce.", feature: "Golden fried veg patty served in soft buns with our signature mayo.", 
+              images: ["1639557", "1199957"] },
+            
+            { id: 6, name: "Cheese Burger", price: 150, desc: "Loaded with an extra slice of melted cheddar cheese.", feature: "Double layer of molten cheddar cheese melting over a spicy patty.", 
+              images: ["2983101", "1639562"] },
+            
+            { id: 7, name: "Margherita Pizza", price: 250, desc: "Classic fresh cheese pizza with Italian basil.", feature: "Wood-fired thin crust, homemade tomato sauce, and loaded with mozzarella cheese.", 
+              images: ["825661", "1146760"] },
+            
+            { id: 8, name: "Veggie Supreme Pizza", price: 270, desc: "Loaded with fresh exotic vegetables and cheese.", feature: "Hand-tossed base loaded with fresh bell peppers, olives, and jalapenos.", 
+              images: ["1566837", "803290"] },
+            
+            { id: 9, name: "White Sauce Pasta", price: 190, desc: "Creamy and cheesy classic Italian white pasta.", feature: "Penne pasta tossed in rich, creamy cheese sauce with exotic herbs.", 
+              images: ["1437267", "1279365"] },
+            
+            { id: 10, name: "Red Sauce Pasta", price: 180, desc: "Spicy and tangy tomato basil red pasta.", feature: "Authentic Italian tomato concasse loaded with olives and garlic.", 
+              images: ["1487511", "1527603"] },
+            
+            { id: 11, name: "French Fries", price: 100, desc: "Crispy golden fried potato fries with seasoning.", feature: "Crispy golden potato fries seasoned perfectly with our secret herbs.", 
+              images: ["115740", "1583884"] },
+            
+            { id: 12, name: "Garlic Bread", price: 120, desc: "Toasted crunchy bread with garlic butter and herbs.", feature: "Crispy on the outside, soft on the inside. Served with melted garlic butter.", 
+              images: ["1126728", "1759088"] },
+            
+            { id: 13, name: "Choco Lava Cake", price: 130, desc: "Warm baked cake with a gooey chocolate center.", feature: "Soft chocolate cake on the outside with a warm, gooey chocolate center.", 
+              images: ["291528", "1359310"] },
+            
+            { id: 14, name: "Blueberry Muffin", price: 90, desc: "Freshly baked soft muffin with sweet blueberries.", feature: "Oven-fresh soft muffin filled with wild blueberries and love.", 
+              images: ["814524", "1111160"] },
+            
+            { id: 15, name: "Red Velvet Cake", price: 140, desc: "Soft red velvet pastry with cream cheese frosting.", feature: "Luxurious red velvet sponge layered with rich cream cheese.", 
+              images: ["1028708", "1721932"] }
+        ];
+
+        let cart = [];
+        let activeIndexes = {}; 
+        let slideIntervals = {}; 
+        
+        const menuGrid = document.getElementById("menu-grid");
+
+        // Render Cards (Exactly 2 images per item)
+        menuItems.forEach(item => {
+            activeIndexes[item.id] = 0; 
+
+            const card = document.createElement("div");
+            card.className = "card";
+            card.dataset.id = item.id;
+            
+            // Constructing URL using wsrv.nl to bypass all API blocks
+            let imgsHtml = item.images.map(imgId => 
+                `<img src="https://wsrv.nl/?url=images.pexels.com/photos/${imgId}/pexels-photo-${imgId}.jpeg&w=500&h=350&fit=cover" alt="${item.name}" onerror="imgError(this)">`
+            ).join('');
+
+            card.innerHTML = `
+                <div class="img-container" onclick="openDetails(${item.id})">
+                    <div class="carousel-track" id="track-${item.id}">
+                        ${imgsHtml}
+                    </div>
+                </div>
+                <div class="card-body" onclick="openDetails(${item.id})">
+                    <div class="card-title">${item.name}</div>
+                    <div class="card-desc">${item.desc}</div>
+                    <div class="card-footer">
+                        <span class="card-price">₹${item.price}</span>
+                        <button class="add-btn" onclick="addToCart(event, ${item.id})">Add +</button>
+                    </div>
+                </div>
+            `;
+            menuGrid.appendChild(card);
+        });
+
+        // Smart Intersection Observer (Only slides if exactly in the center of the screen)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const id = entry.target.dataset.id;
+                if (entry.isIntersecting) {
+                    if (!slideIntervals[id]) {
+                        slideIntervals[id] = setInterval(() => {
+                            activeIndexes[id] = (activeIndexes[id] + 1) % 2; 
+                            const track = document.getElementById(`track-${id}`);
+                            if(track) track.style.transform = `translateX(-${activeIndexes[id] * 50}%)`;
+                        }, 2500); 
+                    }
+                } else {
+                    if (slideIntervals[id]) {
+                        clearInterval(slideIntervals[id]);
+                        slideIntervals[id] = null;
+                    }
+                }
+            });
+        }, { threshold: 0.70 }); // 70% of card must be visible to slide
+
+        document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+        function getActiveImageSrc(id) {
+            const track = document.getElementById(`track-${id}`);
+            const currentIndex = activeIndexes[id];
+            return track.children[currentIndex].src;
+        }
+
+        function openDetails(id) {
+            const item = menuItems.find(m => m.id === id);
+            document.getElementById("dm-img").src = getActiveImageSrc(id);
+            document.getElementById("dm-title").innerText = item.name;
+            document.getElementById("dm-desc").innerText = item.desc;
+            document.getElementById("dm-feature").innerHTML = "✨ <b>Premium Highlights</b> <br>" + item.feature;
+            document.getElementById("dm-price").innerText = "₹" + item.price;
+            document.getElementById("dm-add-btn").onclick = (e) => { addToCart(e, item.id); closeAll(); };
+            
+            document.getElementById("main-overlay").classList.add("show");
+            document.getElementById("detail-modal").classList.add("show");
+        }
+
+        function closeAll() {
+            document.getElementById("main-overlay").classList.remove("show");
+            document.getElementById("detail-modal").classList.remove("show");
+            document.getElementById("cart-sidebar").classList.remove("open");
+        }
+
+        function addToCart(event, id) {
+            event.stopPropagation(); 
+            
+            const wasEmpty = (cart.length === 0);
+            const item = menuItems.find(m => m.id === id);
+            const existing = cart.find(c => c.id === id);
+            const actualImageSrc = getActiveImageSrc(id); 
+
+            if (wasEmpty) {
+                // *** 1st Time - Exact Logo Catching Animation ***
+                if (navigator.vibrate) navigator.vibrate(50);
+                
+                const cartBtn = document.getElementById("nav-cart-btn");
+                const btnRect = event.target.getBoundingClientRect();
+                const cartRect = cartBtn.getBoundingClientRect();
+                
+                // 1. The item bouncing up
+                const flyingImg = document.createElement("img");
+                flyingImg.src = actualImageSrc;
+                flyingImg.style.position = "fixed";
+                flyingImg.style.zIndex = "9998";
+                flyingImg.style.width = "90px";
+                flyingImg.style.height = "90px";
+                flyingImg.style.borderRadius = "50%";
+                flyingImg.style.objectFit = "cover";
+                flyingImg.style.left = btnRect.left + "px";
+                flyingImg.style.top = btnRect.top + "px";
+                flyingImg.style.boxShadow = "0 10px 30px rgba(0,0,0,0.4)";
+                flyingImg.style.transition = "all 0.6s cubic-bezier(0.25, 1, 0.5, 1)";
+                document.body.appendChild(flyingImg);
+
+                // 2. The Cart Button detaching to catch
+                const logoCatcher = cartBtn.cloneNode(true);
+                logoCatcher.style.position = "fixed";
+                logoCatcher.style.zIndex = "9999";
+                logoCatcher.style.margin = "0";
+                logoCatcher.style.left = cartRect.left + "px";
+                logoCatcher.style.top = cartRect.top + "px";
+                logoCatcher.style.transition = "all 0.6s cubic-bezier(0.25, 1, 0.5, 1)";
+                logoCatcher.querySelector('.cart-badge').style.display = 'none';
+                document.body.appendChild(logoCatcher);
+
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+
+                // Move both to center screen
+                setTimeout(() => {
+                    flyingImg.style.left = (centerX - 45) + "px";
+                    flyingImg.style.top = (centerY + 40) + "px";
+                    flyingImg.style.transform = "scale(1.2)";
+
+                    logoCatcher.style.left = (centerX - logoCatcher.offsetWidth / 2) + "px";
+                    logoCatcher.style.top = (centerY - 50) + "px";
+                    logoCatcher.style.transform = "scale(1.4)";
+                }, 50);
+
+                // The Logo "Catches" the item
+                setTimeout(() => {
+                    flyingImg.style.left = (centerX - 45) + "px";
+                    flyingImg.style.top = (centerY - 30) + "px";
+                    flyingImg.style.transform = "scale(0)"; 
+                    flyingImg.style.opacity = "0";
+
+                    logoCatcher.classList.add("shake-anim");
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                }, 650);
+
+                // Cart Logo flies back up to Navbar
+                setTimeout(() => {
+                    logoCatcher.style.left = cartRect.left + "px";
+                    logoCatcher.style.top = cartRect.top + "px";
+                    logoCatcher.style.transform = "scale(1)";
+                }, 1200);
+
+                // Action Complete -> Open sidebar
+                setTimeout(() => {
+                    flyingImg.remove();
+                    logoCatcher.remove();
+                    
+                    if (existing) existing.qty += 1;
+                    else cart.push({ ...item, qty: 1 });
+                    updateCartUI();
+                    triggerBadgeAnim();
+
+                    document.getElementById("cart-sidebar").classList.add("open");
+                    document.getElementById("main-overlay").classList.add("show");
+                }, 1800);
+
+            } else {
+                // *** 2nd Time - Logo Shake Only ***
+                if (navigator.vibrate) navigator.vibrate(50);
+                
+                if (existing) existing.qty += 1;
+                else cart.push({ ...item, qty: 1 });
+                updateCartUI();
+                
+                const cartIcon = document.getElementById("nav-cart-btn");
+                cartIcon.classList.remove("shake-anim");
+                void cartIcon.offsetWidth; 
+                cartIcon.classList.add("shake-anim");
+                
+                triggerBadgeAnim();
+            }
+        }
+
+        function triggerBadgeAnim() {
+            const badge = document.getElementById("cart-count");
+            badge.style.display = "block";
+            badge.classList.remove("pop-anim");
+            void badge.offsetWidth;
+            badge.classList.add("pop-anim");
+        }
+
+        function toggleCart() {
+            document.getElementById("cart-sidebar").classList.toggle("open");
+            document.getElementById("main-overlay").classList.toggle("show");
+        }
+
+        function changeQty(id, delta) {
+            if (navigator.vibrate) navigator.vibrate(30);
+            const item = cart.find(c => c.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById("cart-items");
+            container.innerHTML = "";
+            let total = 0; let count = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center; margin-top:20px; color:#888;">Your cart is currently empty.</p>';
+                document.getElementById("cart-count").style.display = "none";
+            } else {
+                cart.forEach(item => {
+                    total += item.price * item.qty;
+                    count += item.qty;
+                    container.innerHTML += `
+                        <div class="cart-item">
+                            <div>
+                                <div style="font-weight:700; color:#451a03;">${item.name}</div>
+                                <div style="font-size:13px; color:#6b7280;">₹${item.price} x ${item.qty}</div>
+                            </div>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                                <span style="width:20px; text-align:center; font-size:14px; font-weight:bold;">${item.qty}</span>
+                                <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                            </div>
+                        </div>`;
+                });
+            }
+            document.getElementById("cart-count").innerText = count;
+            document.getElementById("cart-total").innerText = "₹" + total;
+        }
+
+        function placeOrder() {
+            if (cart.length === 0) return alert("Please add items to your cart first.");
+            alert("Error: Backend Disconnected");
+        }
+    </script>
+</body>
+</html>
