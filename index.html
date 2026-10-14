@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#F8FAFC" id="meta-theme-color">
+    <title>Rishua Cafe | Ultra Premium</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* === THEME VARIABLES === */
+        :root[data-theme="light"] {
+            --brand-main: #0F62FE;
+            --brand-light: #EDF5FF;
+            --brand-glow: rgba(15, 98, 254, 0.3);
+            --bg-base: #F8FAFC;
+            --surface: #FFFFFF;
+            --surface-glass: rgba(255, 255, 255, 0.85);
+            --text-strong: #020617;
+            --text-body: #64748B;
+            --border-subtle: rgba(226, 232, 240, 0.8);
+            --danger: #ef4444;
+            --success: #10b981;
+            --card-shadow: 0 12px 30px -10px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.03);
+            --sheet-shadow: 0 -20px 40px rgba(0,0,0,0.1);
+        }
+
+        :root[data-theme="dark"] {
+            --brand-main: #3B82F6;
+            --brand-light: rgba(59, 130, 246, 0.15);
+            --brand-glow: rgba(59, 130, 246, 0.4);
+            --bg-base: #0F172A;
+            --surface: #1E293B;
+            --surface-glass: rgba(30, 41, 59, 0.85);
+            --text-strong: #F8FAFC;
+            --text-body: #94A3B8;
+            --border-subtle: rgba(51, 65, 85, 0.8);
+            --danger: #f87171;
+            --success: #34d399;
+            --card-shadow: 0 12px 30px -10px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.2);
+            --sheet-shadow: 0 -20px 40px rgba(0,0,0,0.5);
+        }
+
+        :root {
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --safe-top: env(safe-area-inset-top, 10px);
+            --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-strong);
+            padding-bottom: calc(100px + var(--safe-bottom));
+            overflow-x: hidden;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* === APP SPLASH SCREEN === */
+        .splash-screen {
+            position: fixed; inset: 0;
+            background: var(--brand-main);
+            z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+        }
+        .splash-screen.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
+        .splash-logo {
+            width: 80px; height: 80px; background: white; color: var(--brand-main);
+            border-radius: 24px; display: flex; justify-content: center; align-items: center;
+            font-size: 40px; font-weight: 900;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        @keyframes pulse { 0% { transform: scale(0.95); } 50% { transform: scale(1.05); } 100% { transform: scale(0.95); } }
+
+        /* === RIPPLE EFFECT === */
+        .ripple {
+            position: absolute; border-radius: 50%;
+            transform: scale(0); animation: rippleEffect 0.6s linear;
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        @keyframes rippleEffect { to { transform: scale(4); opacity: 0; } }
+        .btn-relative { position: relative; overflow: hidden; }
+
+        /* === GLASS HEADER === */
+        .glass-header {
+            position: fixed; top: var(--safe-top); left: 16px; right: 16px;
+            background: var(--surface-glass);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 8px 8px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            z-index: 50;
+        }
+        .header-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .brand-text { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
+        
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+        .icon-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--surface); border: 1px solid var(--border-subtle);
+            display: flex; justify-content: center; align-items: center;
+            color: var(--text-strong); font-size: 18px;
+            position: relative; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            transition: transform 0.2s var(--spring);
+        }
+        .icon-btn:active { transform: scale(0.9); }
+        .badge {
+            position: absolute; top: 0; right: 0;
+            background: var(--danger); color: white;
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 10px; font-weight: 800;
+            display: flex; justify-content: center; align-items: center;
+            border: 2px solid var(--surface); transform: scale(0); transition: 0.3s var(--spring);
+        }
+        .badge.show { transform: scale(1); }
+
+        /* === HERO SECTION === */
+        .hero-section {
+            padding: calc(100px + var(--safe-top)) 20px 30px;
+            text-align: center; position: relative;
+        }
+        .hero-bg {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% -20%, var(--brand-light) 0%, transparent 70%);
+            z-index: -1;
+        }
+        .hero-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--brand-main); color: white;
+            padding: 8px 16px; border-radius: 100px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 24px;
+            box-shadow: 0 10px 20px var(--brand-glow);
+        }
+        .hero-title {
+            font-size: 40px; font-weight: 900; line-height: 1.1; letter-spacing: -1.5px;
+            margin-bottom: 12px; color: var(--text-strong);
+        }
+        .hero-title span { background: linear-gradient(135deg, var(--brand-main), #8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-desc { font-size: 15px; color: var(--text-body); font-weight: 500; max-width: 90%; margin: 0 auto; }
+
+        /* === CATEGORIES === */
+        .categories-container {
+            position: sticky; top: calc(75px + var(--safe-top)); z-index: 40;
+            padding: 15px 0; background: var(--surface-glass);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .categories-scroll { display: flex; gap: 12px; padding: 0 20px; overflow-x: auto; scroll-behavior: smooth; }
+        .cat-pill {
+            padding: 10px 22px; border-radius: 100px;
+            background: var(--bg-base); color: var(--text-body);
+            font-size: 14px; font-weight: 700; white-space: nowrap;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: all 0.3s var(--spring); cursor: pointer;
+        }
+        .cat-pill.active {
+            background: var(--text-strong); color: var(--surface); border-color: var(--text-strong);
+            transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* === PRODUCT GRID === */
+        .menu-section { padding: 24px 20px; }
+        .section-header { font-size: 24px; font-weight: 900; margin-bottom: 24px; letter-spacing: -0.5px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        
+        .p-card {
+            background: var(--surface); border-radius: 24px;
+            padding: 8px; display: flex; flex-direction: column;
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--card-shadow);
+            cursor: pointer; transition: transform 0.3s var(--spring);
+        }
+        .p-card:active { transform: scale(0.95); }
+        
+        .p-img-box {
+            width: 100%; aspect-ratio: 1/1; border-radius: 18px;
+            overflow: hidden; position: relative; background: var(--bg-base);
+        }
+        .p-img-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s var(--ease-out); }
+        .p-card:hover .p-img-box img { transform: scale(1.1); }
+        
+        .diet-indicator {
+            position: absolute; top: 10px; right: 10px;
+            background: var(--surface-glass); backdrop-filter: blur(4px);
+            width: 24px; height: 24px; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle);
+        }
+        .diet-indicator.veg { border-color: var(--success); }
+        .diet-indicator.veg::after { content:''; width:10px; height:10px; background:var(--success); border-radius:50%; }
+        .diet-indicator.non-veg { border-color: var(--danger); }
+        .diet-indicator.non-veg::after { content:''; width:10px; height:10px; background:var(--danger); border-radius:50%; }
+
+        .p-info { padding: 16px 8px 8px; display: flex; flex-direction: column; flex: 1; }
+        .p-title { font-size: 16px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; color: var(--text-strong); }
+        .p-portion { font-size: 12px; color: var(--text-body); font-weight: 600; margin-bottom: 20px; }
+        .p-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .p-price { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
+
+        /* Morphing Buttons */
+        .action-area { width: 85px; height: 40px; }
+        .btn-add {
+            width: 100%; height: 100%; border-radius: 14px;
+            background: var(--brand-light); color: var(--brand-main);
+            border: 1px solid var(--border-subtle);
+            font-size: 13px; font-weight: 800; text-transform: uppercase;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-add:active { transform: scale(0.9); background: var(--brand-main); color: white; }
+        
+        .btn-qty {
+            width: 100%; height: 100%; border-radius: 14px;
+            background: var(--brand-main); color: white;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 6px 16px var(--brand-glow); overflow: hidden;
+        }
+        .btn-qty button {
+            width: 35%; height: 100%; background: transparent; border: none; color: white;
+            cursor: pointer; font-size: 14px; transition: background 0.2s;
+        }
+        .btn-qty button:active { background: rgba(0,0,0,0.2); }
+        .btn-qty span { font-weight: 800; font-size: 15px; }
+
+        /* === FLOATING CART (DYNAMIC PILL) === */
+        .glass-float-cart {
+            position: fixed; bottom: calc(20px + var(--safe-bottom));
+            left: 50%; transform: translate(-50%, 150%);
+            width: calc(100% - 32px); max-width: 400px;
+            background: var(--brand-main); color: white;
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 24px; padding: 12px 16px 12px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 20px 40px var(--brand-glow);
+            z-index: 60; transition: transform 0.5s var(--spring); cursor: pointer;
+        }
+        .glass-float-cart.visible { transform: translate(-50%, 0); }
+        .glass-float-cart:active { transform: translate(-50%, 0) scale(0.95); }
+        
+        .gfc-left { display: flex; align-items: center; gap: 14px; }
+        .gfc-icon {
+            width: 48px; height: 48px; border-radius: 16px;
+            background: rgba(255,255,255,0.2); color: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 22px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .gfc-text { color: white; }
+        .gfc-items { font-size: 11px; font-weight: 800; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
+        .gfc-price { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+        .gfc-btn { background: white; color: var(--brand-main); padding: 12px 20px; border-radius: 16px; font-size: 15px; font-weight: 800; }
+
+        /* === BOTTOM SHEETS & MODALS === */
+        .glass-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 70; opacity: 0; pointer-events: none; transition: opacity 0.4s var(--ease-out);
+        }
+        .glass-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .bottom-sheet {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--bg-base); z-index: 80; border-radius: 40px 40px 0 0;
+            transform: translateY(100%); transition: transform 0.5s var(--spring);
+            max-height: 94vh; display: flex; flex-direction: column;
+            padding-bottom: var(--safe-bottom); box-shadow: var(--sheet-shadow);
+        }
+        .bottom-sheet.active { transform: translateY(0); }
+        .drag-indicator { width: 48px; height: 6px; background: var(--border-subtle); border-radius: 10px; margin: 16px auto; }
+
+        /* Product Sheet */
+        .sheet-img { width: 100%; height: 320px; object-fit: cover; }
+        .sheet-content {
+            padding: 24px 24px 40px; flex: 1; overflow-y: auto;
+            background: var(--surface); border-radius: 40px 40px 0 0; margin-top: -40px; position: relative;
+        }
+        .sheet-title { font-size: 28px; font-weight: 900; letter-spacing: -1px; margin-bottom: 6px; }
+        .sheet-portion { font-size: 15px; color: var(--text-body); font-weight: 600; margin-bottom: 24px; }
+        .sheet-desc { font-size: 16px; color: var(--text-body); line-height: 1.6; font-weight: 500; }
+        
+        .sheet-footer {
+            padding: 24px; background: var(--surface); border-top: 1px solid var(--border-subtle);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sheet-price-label { font-size: 12px; color: var(--text-body); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .sheet-price-val { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+
+        /* Cart Sheet */
+        .cart-header { padding: 10px 24px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-header h2 { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+        .close-btn {
+            width: 40px; height: 40px; border-radius: 50%; background: var(--surface);
+            display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-subtle);
+            color: var(--text-strong); font-size: 18px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .cart-items-wrap { flex: 1; overflow-y: auto; padding: 0 24px 24px; }
+        
+        .c-item {
+            background: var(--surface); padding: 16px; border-radius: 20px; margin-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid var(--border-subtle); box-shadow: var(--card-shadow);
+        }
+        
+        .bill-box {
+            background: var(--surface); padding: 24px; border-radius: 24px;
+            border: 1px solid var(--border-subtle); margin-top: 30px;
+        }
+        .b-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; color: var(--text-body); margin-bottom: 16px; }
+        .b-total { border-top: 2px dashed var(--border-subtle); padding-top: 20px; margin-top: 16px; font-size: 22px; font-weight: 900; color: var(--text-strong); }
+
+        .checkout-btn {
+            width: 100%; padding: 22px; border-radius: 24px; border: none;
+            background: var(--text-strong); color: var(--surface);
+            font-size: 20px; font-weight: 900; display: flex; justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); cursor: pointer;
+            transition: transform 0.2s var(--spring); position: relative; overflow: hidden;
+        }
+        .checkout-btn:active { transform: scale(0.96); }
+
+        /* Processing State */
+        .processing-ui {
+            position: absolute; inset: 0; background: var(--text-strong);
+            display: flex; justify-content: center; align-items: center; gap: 12px;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .processing-ui.active { opacity: 1; pointer-events: auto; }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Confetti Canvas */
+        #confetti { position: fixed; inset: 0; z-index: 999; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <!-- App Splash Screen -->
+    <div class="splash-screen" id="splash">
+        <div class="splash-logo">R</div>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti"></canvas>
+
+    <!-- Header -->
+    <header class="glass-header">
+        <div class="header-brand" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+            <div class="splash-logo" style="width: 36px; height: 36px; font-size: 18px; border-radius: 12px; animation:none; box-shadow:none;">R</div>
+            <div class="brand-text">Rishua Cafe</div>
+        </div>
+        <div class="header-actions">
+            <!-- Theme Toggle Button -->
+            <button class="icon-btn btn-relative" onclick="toggleTheme(event)">
+                <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <div class="icon-btn btn-relative" onclick="toggleCart(event)">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <div class="badge" id="nav-badge">0</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="hero-section">
+        <div class="hero-bg"></div>
+        <div class="hero-tag"><i class="fa-solid fa-crown"></i> Elite Dining</div>
+        <h1 class="hero-title">Beyond<br><span>Imagination.</span></h1>
+        <p class="hero-desc">Craving something extraordinary? Our master chefs have you covered.</p>
+    </div>
+
+    <div class="categories-container">
+        <div class="categories-scroll hide-scrollbar" id="cat-scroll"></div>
+    </div>
+
+    <div class="menu-section">
+        <h2 class="section-header" id="sec-title">Discover Menu</h2>
+        <div class="grid" id="menu-grid"></div>
+    </div>
+
+    <!-- Floating Cart -->
+    <div class="glass-float-cart" id="float-cart" onclick="toggleCart(event)">
+        <div class="gfc-left">
+            <div class="gfc-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+            <div class="gfc-text">
+                <div class="gfc-items" id="fc-items">0 ITEMS</div>
+                <div class="gfc-price" id="fc-price">₹0</div>
+            </div>
+        </div>
+        <div class="gfc-btn btn-relative">Checkout</div>
+    </div>
+
+    <!-- Overlays & Modals -->
+    <div class="glass-overlay" id="overlay" onclick="closeAll()"></div>
+
+    <!-- Product Modal -->
+    <div class="bottom-sheet" id="product-sheet">
+        <div class="drag-indicator"></div>
+        <img src="" class="sheet-img" id="ps-img">
+        <div class="sheet-content">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
+                <div class="hero-tag" id="ps-cat" style="margin:0; box-shadow:none; font-size:10px;"></div>
+                <div class="diet-indicator" id="ps-diet" style="position:static; width:28px; height:28px;"></div>
+            </div>
+            <h2 class="sheet-title" id="ps-title"></h2>
+            <div class="sheet-portion" id="ps-portion"></div>
+            <p class="sheet-desc" id="ps-desc"></p>
+        </div>
+        <div class="sheet-footer">
+            <div>
+                <div class="sheet-price-label">Total Price</div>
+                <div class="sheet-price-val" id="ps-price"></div>
+            </div>
+            <div class="action-area" style="width: 150px; height: 54px;" id="ps-action"></div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="bottom-sheet" id="cart-sheet" style="height: 92vh;">
+        <div class="drag-indicator"></div>
+        <div class="cart-header">
+            <h2>Your Order</h2>
+            <button class="close-btn btn-relative" onclick="closeAll(event)"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="cart-items-wrap hide-scrollbar">
+            <div id="empty-state" style="text-align:center; padding: 60px 20px;">
+                <div style="width: 100px; height: 100px; background:var(--surface); border:1px solid var(--border-subtle); border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 24px; box-shadow: var(--card-shadow);">
+                    <i class="fa-solid fa-bag-shopping" style="font-size:40px; color:var(--text-body);"></i>
+                </div>
+                <h3 style="font-size:24px; font-weight:900; margin-bottom:12px;">Bag is empty</h3>
+                <p style="color:var(--text-body); font-size:16px;">Good food is always cooking. Add some!</p>
+            </div>
+            
+            <div id="cart-data" class="hidden">
+                <div id="c-list"></div>
+                <div class="bill-box">
+                    <div class="b-row"><span>Subtotal</span><span id="b-sub" style="font-weight: 800; color:var(--text-strong);"></span></div>
+                    <div class="b-row"><span>Handling & Taxes</span><span style="font-weight: 800; color:var(--text-strong);">₹15</span></div>
+                    <div class="b-row b-total"><span>Grand Total</span><span id="b-total"></span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sheet-footer hidden" id="cart-footer" style="padding: 24px;">
+            <button class="checkout-btn" onclick="checkout(event)">
+                <div style="display:flex; justify-content:space-between; width:100%; align-items:center;" id="btn-normal-ui">
+                    <span id="btn-pay-val">₹0</span>
+                    <span>Swipe to Pay <i class="fa-solid fa-arrow-right" style="margin-left:10px;"></i></span>
+                </div>
+                <div class="processing-ui" id="btn-process-ui">
+                    <div class="spinner"></div> <span>Processing...</span>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const products = [
+            { id: 1, name: "Strawberry Cheesecake", category: "Cakes", price: 250, type: "veg", portion: "1 Slice Premium", image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=600&q=80", desc: "A masterpiece of creamy baked cheesecake topped with glazed strawberries." },
+            { id: 2, name: "Royal Paneer Biryani", category: "Biryani", price: 220, type: "veg", portion: "Serves 1-2 (500g)", image: "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?auto=format&fit=crop&w=600&q=80", desc: "Long grain basmati slow-cooked with malai paneer and rich saffron." },
+            { id: 3, name: "Spicy Hakka Noodles", category: "Chinese", price: 150, type: "veg", portion: "1 Plate", image: "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=600&q=80", desc: "Wok-tossed noodles bursting with authentic asian flavors and crunchy veggies." },
+            { id: 4, name: "Classic Steam Momos", category: "Chinese", price: 120, type: "veg", portion: "8 Pcs", image: "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=600&q=80", desc: "Thin wrapper dumplings stuffed with fresh seasoned vegetables." },
+            { id: 5, name: "Dark Truffle Cake", category: "Cakes", price: 450, type: "veg", portion: "Half Kg", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80", desc: "Intense Belgian chocolate sponge with molten ganache layers." },
+            { id: 6, name: "Delhi Butter Chicken", category: "Main Course", price: 320, type: "non-veg", portion: "Serves 2 (500ml)", image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=600&q=80", desc: "Tandoor roasted chicken chunks in a velvety, smoky tomato gravy." },
+            { id: 7, name: "Afghani Paneer Tikka", category: "Main Course", price: 260, type: "veg", portion: "6 Pcs", image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=600&q=80", desc: "Cottage cheese marinated in rich cream and spices, char-grilled." },
+            { id: 8, name: "Awadhi Chicken Biryani", category: "Biryani", price: 280, type: "non-veg", portion: "Serves 1-2", image: "https://images.unsplash.com/photo-1589302168068-964664d93cb0?auto=format&fit=crop&w=600&q=80", desc: "Nizami style dum biryani with juicy bone-in chicken and secret spices." },
+            { id: 9, name: "Kolkata Egg Roll", category: "Rolls", price: 80, type: "non-veg", portion: "1 Pc", image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80", desc: "Crispy laccha paratha wrapped with a fluffy double-egg omelette." },
+            { id: 10, name: "Chicken Kathi Roll", category: "Rolls", price: 120, type: "non-veg", portion: "1 Pc", image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80", desc: "Spicy chicken tikka chunks rolled with mint mayo and onions." }
+        ];
+        const categories = ["All", "Biryani", "Chinese", "Cakes", "Main Course", "Rolls"];
+        let cart = {}; let currCat = "All"; let activeId = null;
+
+        // --- THEME LOGIC ---
+        function toggleTheme(e) {
+            createRipple(e);
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            document.getElementById('meta-theme-color').content = newTheme === 'light' ? '#F8FAFC' : '#0F172A';
+            document.getElementById('theme-icon').className = newTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        }
+
+        // --- RIPPLE EFFECT ---
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const circle = document.createElement("span");
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            const rect = button.getBoundingClientRect();
+            
+            // Handle touch or click coordinates
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${clientX - rect.left - radius}px`;
+            circle.style.top = `${clientY - rect.top - radius}px`;
+            circle.classList.add("ripple");
+            
+            const ripple = button.querySelector(".ripple");
+            if (ripple) ripple.remove();
+            button.appendChild(circle);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            // Remove Splash Screen after 1.2s to simulate app loading
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('hide');
+            }, 1200);
+
+            renderCats(); 
+            renderGrid(); 
+            calcUI();
+        };
+
+        // --- RENDER LOGIC ---
+        function renderCats() {
+            document.getElementById('cat-scroll').innerHTML = categories.map(c => 
+                `<div class="cat-pill ${c===currCat ? 'active':''}" onclick="setCat(this, '${c}', event)">${c}</div>`
+            ).join('');
+            document.getElementById('sec-title').innerText = currCat === 'All' ? 'Discover Menu' : currCat;
+        }
+
+        function setCat(el, c, e) {
+            createRipple(e);
+            currCat = c; renderCats(); renderGrid();
+            el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+
+        function getBtn(id) {
+            const q = cart[id] || 0;
+            if(q===0) return `<button class="btn-add btn-relative" onclick="event.stopPropagation(); update(${id}, 1, event)">ADD</button>`;
+            return `
+                <div class="btn-qty" onclick="event.stopPropagation()">
+                    <button onclick="update(${id}, -1, event)" class="btn-relative"><i class="fa-solid fa-minus"></i></button>
+                    <span>${q}</span>
+                    <button onclick="update(${id}, 1, event)" class="btn-relative"><i class="fa-solid fa-plus"></i></button>
+                </div>`;
+        }
+
+        function renderGrid() {
+            const arr = currCat === 'All' ? products : products.filter(x => x.category === currCat);
+            document.getElementById('menu-grid').innerHTML = arr.map((p) => `
+                <div class="p-card btn-relative" onclick="openProduct(${p.id}, event)">
+                    <div class="p-img-box">
+                        <img src="${p.image}">
+                        <div class="diet-indicator ${p.type}"></div>
+                    </div>
+                    <div class="p-info">
+                        <h3 class="p-title">${p.name}</h3>
+                        <div class="p-portion">${p.portion}</div>
+                        <div class="p-bottom">
+                            <span class="p-price">₹${p.price}</span>
+                            <div class="action-area" id="wrap-${p.id}">${getBtn(p.id)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function update(id, val, e) {
+            if(e) createRipple(e);
+            const n = (cart[id] || 0) + val;
+            if(n > 0) cart[id] = n; else delete cart[id];
+            
+            const w = document.getElementById(`wrap-${id}`);
+            if(w) w.innerHTML = getBtn(id);
+            if(activeId === id) document.getElementById('ps-action').innerHTML = getBtn(id);
+            
+            calcUI();
+        }
+
+        function calcUI() {
+            let qty = 0, sub = 0;
+            for(let id in cart) {
+                const p = products.find(x => x.id == id);
+                if(p) { qty += cart[id]; sub += p.price * cart[id]; }
+            }
+            const tot = qty > 0 ? sub + 15 : 0;
+            
+            const bdg = document.getElementById('nav-badge');
+            if(qty > 0) { bdg.classList.add('show'); bdg.innerText = qty; } else bdg.classList.remove('show');
+            
+            const fc = document.getElementById('float-cart');
+            if(qty > 0) {
+                fc.classList.add('visible');
+                document.getElementById('fc-items').innerText = `${qty} ITEM${qty>1?'S':''}`;
+                document.getElementById('fc-price').innerText = `₹${tot}`;
+            } else fc.classList.remove('visible');
+
+            if(qty === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                document.getElementById('cart-data').classList.add('hidden');
+                document.getElementById('cart-footer').classList.add('hidden');
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+                document.getElementById('cart-data').classList.remove('hidden');
+                document.getElementById('cart-footer').classList.remove('hidden');
+                
+                document.getElementById('c-list').innerHTML = Object.entries(cart).map(([id, q]) => {
+                    const p = products.find(x => x.id == id);
+                    return `
+                        <div class="c-item">
+                            <div style="flex:1">
+                                <h4 style="font-size:16px; font-weight:800; margin-bottom:4px;">${p.name}</h4>
+                                <span style="font-size:18px; font-weight:900;">₹${p.price}</span>
+                            </div>
+                            <div class="action-area" style="width:100px; height:44px;">${getBtn(p.id)}</div>
+                        </div>`;
+                }).join('');
+                
+                document.getElementById('b-sub').innerText = `₹${sub}`;
+                document.getElementById('b-total').innerText = `₹${tot}`;
+                document.getElementById('btn-pay-val').innerText = `₹${tot}`;
+            }
+        }
+
+        // --- MODALS ---
+        function openProduct(id, e) {
+            if(e) createRipple(e);
+            const p = products.find(x => x.id === id); if(!p) return;
+            activeId = id;
+            document.getElementById('ps-img').src = p.image;
+            document.getElementById('ps-cat').innerText = p.category;
+            document.getElementById('ps-diet').className = `diet-indicator ${p.type}`;
+            document.getElementById('ps-title').innerText = p.name;
+            document.getElementById('ps-portion').innerText = p.portion;
+            document.getElementById('ps-desc').innerText = p.desc;
+            document.getElementById('ps-price').innerText = `₹${p.price}`;
+            document.getElementById('ps-action').innerHTML = getBtn(id);
+
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('product-sheet').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function toggleCart(e) {
+            if(e) createRipple(e);
+            const sh = document.getElementById('cart-sheet');
+            const ov = document.getElementById('overlay');
+            if(sh.classList.contains('active')) closeAll();
+            else {
+                closeAll(); 
+                sh.classList.add('active'); ov.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeAll(e) {
+            if(e) createRipple(e);
+            activeId = null;
+            document.getElementById('product-sheet').classList.remove('active');
+            document.getElementById('cart-sheet').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // --- ADVANCED CHECKOUT & CONFETTI ---
+        function checkout(e) {
+            createRipple(e);
+            const normalUi = document.getElementById('btn-normal-ui');
+            const processUi = document.getElementById('btn-process-ui');
+            
+            // Show processing
+            normalUi.style.opacity = '0';
+            processUi.classList.add('active');
+
+            setTimeout(() => {
+                // Reset UI
+                normalUi.style.opacity = '1';
+                processUi.classList.remove('active');
+                
+                closeAll(); cart = {}; renderGrid(); calcUI();
+                fireConfetti();
+                window.scrollTo({top:0, behavior:'smooth'});
+            }, 1500);
+        }
+
+        // Simple Confetti Generator
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const pieces = [];
+            const colors = ['#0F62FE', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            for(let i=0; i<100; i++) {
+                pieces.push({
+                    x: canvas.width / 2, y: canvas.height / 2 + 100,
+                    vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 1) * 20 - 5,
+                    size: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rot: Math.random() * 360, rotSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+                pieces.forEach(p => {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.5; // gravity
+                    p.rot += p.rotSpeed;
+                    if(p.y < canvas.height) active = true;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    ctx.restore();
+                });
+                if(active) requestAnimationFrame(animate);
+                else ctx.clearRect(0,0, canvas.width, canvas.height);
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
